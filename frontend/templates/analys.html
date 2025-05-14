@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Авторизация{% endblock %}
+
+
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+
+<div class="layout">
+    <div class="rubber">
+
+      <div class="col1">
+        <progress id="progressBar" value="0" max="100" style="display: none;"></progress>
+        <div id="upload_message"></div>
+        <div id="json_stats_output"></div>
+      </div>
+      
+      <div class="col2">
+        <button onclick="StartAlg()">Запустить прогноз</button>
+        <div id="load-plot">
+        </div>
+      </div>
+    </div>
+    
+    <div class="col3">
+      <div class="inner-content" id="groups">
+      </div>
+    </div>      
+  </div>
+{% endblock %}

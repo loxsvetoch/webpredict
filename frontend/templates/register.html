@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+<div class="register-container">
+  <h1>Регистрация</h1>
+  {% for cat, msg in flash %}
+    <div class="flash {{ cat }}">{{ msg }}</div>
+  {% endfor %}
+  <form action="/register" method="post" class="register-form">
+    <input type="text" name="last_name" placeholder="Фамилия" required />
+    <input type="text" name="first_name" placeholder="Имя" required />
+    <input type="text" name="patronymic" placeholder="Отчество" required />
+    <input type="tel" name="phone_number" placeholder="Номер телефона" required />
+    <input type="password" name="psw" placeholder="Пароль" required />
+    <input type="password" name="psw_again" placeholder="Повторите пароль" required />
+    <button type="submit">Зарегистрироваться</button>
+  </form>
+  <p>Уже есть аккаунт? <a href="/login">Войти</a></p>
+</div>
+{% endblock %}

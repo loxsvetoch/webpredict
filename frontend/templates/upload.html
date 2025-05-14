@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Загрузка данных{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/style.css">
+
+<div class="max-w-2xl mx-auto py-8 px-4">
+  <h1 class="text-3xl font-bold mb-4">Загрузка CSV-файлов</h1>
+  <p class="mb-4">Загрузите все четыре обязательных файла:</p>
+  <ul class="list-disc pl-6 mb-6">
+    <li>group.csv</li>
+    <li>exam.csv</li>
+    <li>subject.csv</li>
+    <li>teacher.csv</li>
+  </ul>
+
+  <form id="uploadForm" class="space-y-4 bg-white p-6 rounded shadow">
+    <div>
+      <label class="block font-medium mb-1">group.csv</label>
+      <input type="file" name="files" data-type="group" accept=".csv" required class="w-full" />
+    </div>
+    <div>
+      <label class="block font-medium mb-1">exam.csv</label>
+      <input type="file" name="files" data-type="exam" accept=".csv" required class="w-full" />
+    </div>
+    <div>
+      <label class="block font-medium mb-1">subject.csv</label>
+      <input type="file" name="files" data-type="subject" accept=".csv" required class="w-full" />
+    </div>
+    <div>
+      <label class="block font-medium mb-1">teacher.csv</label>
+      <input type="file" name="files" data-type="teacher" accept=".csv" required class="w-full" />
+    </div>
+
+    <button type="submit" class="btn-primary">Загрузить всё</button>
+  </form>
+
+  <div id="message" class="mt-4 text-center"></div>
+</div>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  const inputs = form.querySelectorAll('input[name="files"]');
+  const data = new FormData();
+
+  // Собираем два параллельных массива
+  inputs.forEach(input => {
+    const file = input.files[0];
+    const type = input.dataset.type;
+    if (file && type) {
+      data.append('file_types', type);
+      data.append('files', file);
+    }
+  });
+
+  const msg = document.getElementById('message');
+  msg.textContent = '1/2: Загрузка файлов...';
+
+  // 1) сохранение файлов
+  const uploadResp = await fetch('/upload-csv-multiple', {
+    method: 'POST',
+    body: data
+  });
+
+  if (!uploadResp.ok) {
+    const err = await uploadResp.text();
+    msg.textContent = `Ошибка при загрузке файлов: ${uploadResp.status} ${err}`;
+    return;
+  }
+
+  msg.textContent = '2/2: Обработка и запись в БД...';
+
+  // 2) обработка CSV и заполнение БД
+  const processResp = await fetch('/process-uploads', {
+    method: 'POST',
+    // нет тела — просто берём уже загруженные файлы
+  });
+
+  if (processResp.status === 207) {
+    const json = await processResp.json();
+    msg.innerHTML = `Частичные ошибки при импорте:<br>${json.errors.join('<br>')}`;
+  } else if (!processResp.ok) {
+    const err = await processResp.text();
+    msg.textContent = `Ошибка при импорте: ${processResp.status} ${err}`;
+  } else {
+    const json = await processResp.json();
+    msg.textContent = json.message || 'Импорт успешно завершён!';
+  }
+});
+</script>
+{% endblock %}

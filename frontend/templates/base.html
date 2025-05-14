@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <style>
+        /* Кастомные стили поверх Tailwind */
+        .content-section {
+            background: linear-gradient(to bottom right, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+    
+        .content-section:hover {
+            transform: translateY(-2px);
+        }
+    
+        .formula-box {
+            border-left: 4px solid #8b5cf6;
+            background: rgba(139, 92, 246, 0.05);
+            transition: all 0.3s ease;
+        }
+    
+        .formula-box:hover {
+            background: rgba(139, 92, 246, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+    
+        .feature-icon {
+            width: 28px;
+            height: 28px;
+            margin-right: 12px;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+        }
+    
+        .limitation-card {
+            position: relative;
+            overflow: hidden;
+            padding-left: 2rem;
+        }
+    
+        .limitation-card::before {
+            content: "⚠️";
+            position: absolute;
+            left: 0;
+            top: 0.2rem;
+            font-size: 1.2rem;
+        }
+    
+        .tech-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            background: #ede9fe;
+            color: #6d28d9;
+            font-weight: 500;
+            margin: 0.2rem;
+        }
+    
+        @media (max-width: 768px) {
+            .responsive-list {
+                column-count: 1;
+                column-gap: 2rem;
+            }
+            
+            .formula-box {
+                font-size: 0.9rem;
+                padding: 1rem;
+            }
+        }
+    
+        /* Анимация заголовка */
+        @keyframes title-gradient {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+    
+        .animated-title {
+            background: linear-gradient(45deg, #7c3aed, #4f46e5, #9333ea);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: title-gradient 6s ease infinite;
+        }
+        :root {
+            --arrow-size: 10px;
+            --menu-color: #2c3e50;
+            --active-color: #3498db;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            padding: 0;
+            position: relative;
+        }
+
+        nav li {
+            position: relative;
+        }
+
+        nav a {
+            padding: 12px 25px;
+            text-decoration: none;
+            color: var(--menu-color);
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Активный пункт меню */
+        .nav-active {
+            background: var(--active-color);
+            color: white !important;
+            border-radius: 5px;
+        }
+
+        nav li:not(:last-child)::after {
+            content: '➔';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--menu-color);
+            opacity: 0.5;
+        }
+        nav a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+
+    <script src="/static/js/index.js"></script>
+</head>
+
+<body>
+  <nav>
+    <ul>
+
+      {% if request.state.user %}
+        <li><a href="/logout">Выйти</a></li>
+        <li><span>{{ request.state.user.first_name }} {{ request.state.user.last_name }}</span></li>
+      {% else %}
+        <li><a href="/login" class="{{ 'nav-active' if active_page=='login' }}">Авторизация</a></li>
+        <li><a href="/register" class="{{ 'nav-active' if active_page=='reg' }}">Регистрация</a></li>
+      {% endif %}
+      <li><a href="/" class="{{ 'nav-active' if active_page=='info' }}">Информация</a></li>
+      <li><a href="/upload" class="{{ 'nav-active' if active_page=='upload' }}">Загрузка</a></li>
+      <li><a href="/analysis" class="{{ 'nav-active' if active_page=='analysis' }}">Анализ</a></li>
+      <li><a href="/forecast" class="{{ 'nav-active' if active_page=='forecast' }}">Прогноз</a></li>
+    </ul>
+  </nav>
+  <div class="content">
+    {% block content %}
+    
+    {% endblock %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Прогноз экзамена{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-8 px-4">
+  <h1 class="text-3xl font-bold mb-6 text-purple-700">Прогноз для следующего экзамена</h1>
+  <form id="forecast-form" class="space-y-4 bg-white p-6 rounded shadow">
+    <div>
+      <label>Группа</label>
+      <select id="group-select" required class="w-full border rounded px-3 py-2"></select>
+    </div>
+    <div>
+      <label>Преподаватель</label>
+      <select id="teacher-select" required class="w-full border rounded px-3 py-2"></select>
+    </div>
+    <div>
+      <label>Предмет</label>
+      <select id="subject-select" required class="w-full border rounded px-3 py-2"></select>
+    </div>
+    <div>
+      <label>Номер будущего экзамена</label>
+      <input type="number" id="exam-index" min="1" required 
+             class="w-full border rounded px-3 py-2" placeholder="Введите номер">
+    </div>
+    <button type="submit" class="btn-primary">Получить прогноз</button>
+  </form>
+
+  <div id="forecast-result" class="mt-6 p-4 bg-gray-50 hidden">
+    <h2 class="text-xl mb-2">Результат:</h2>
+    <p id="forecast-value" class="text-2xl font-bold text-green-600"></p>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const byId = id => document.getElementById(id);
+  const groupSel   = byId('group-select');
+  const teacherSel = byId('teacher-select');
+  const subjectSel = byId('subject-select');
+  const form       = byId('forecast-form');
+  const resultDiv  = byId('forecast-result');
+  const resultVal  = byId('forecast-value');
+
+  // Универсальная заполнитель-функция
+  async function fill(selectEl, url, textKey) {
+    const resp = await fetch(url);
+    const data = await resp.json();
+    data.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.id;
+      opt.textContent = o[textKey];
+      selectEl.append(opt);
+    });
+  }
+
+  fill(groupSel,   '/groups',   'title');
+  fill(teacherSel, '/teachers', 'full_name');
+  fill(subjectSel, '/subjects', 'short_title');
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    resultDiv.classList.add('hidden');
+
+    const g  = groupSel.value;
+    const t  = teacherSel.value;
+    const s  = subjectSel.value;
+    const ix = byId('exam-index').value;
+
+    try {
+      const resp = await fetch(`/forecast/${g}/${t}/${s}/${ix}`);
+      if (!resp.ok) throw new Error((await resp.json()).detail || resp.statusText);
+      const { forecast } = await resp.json();
+      resultVal.textContent = (forecast * 100).toFixed(1) + '%';
+      resultDiv.classList.remove('hidden');
+    } catch (err) {
+      alert('Ошибка: ' + err.message);
+    }
+  });
+});
+</script>
+{% endblock %}
